@@ -1,1 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Needle Tracker - Machine {{ machine_id }} Head {{ head_id }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        h2 {
+            margin-bottom: 20px;
+        }
+        label {
+            display: inline-block;
+            width: 130px;
+        }
+        select, input[type="radio"] {
+            margin-right: 10px;
+        }
+        .log-box {
+            background-color: #f2f2f2;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Needle Change Log - Machine {{ machine_id }}, Head {{ head_id }}</h2>
 
+    <form method="POST">
+        <label>Needle Number:</label>
+        <select name="needle_number" required>
+            {% for i in range(1, 16) %}
+                <option value="{{ i }}">{{ i }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <label>Needle Type:</label>
+        <input type="radio" name="needle_type" value="11" required> 11
+        <input type="radio" name="needle_type" value="12" required> 12<br><br>
+
+        <button type="submit">Log Change</button>
+    </form>
+
+    <div class="log-box">
+        <h3>Latest Changes:</h3>
+        <ul>
+            {% for needle, log in last_change_dict.items() %}
+                <li>Needle {{ needle }} (Type {{ log.needle_type }}): {{ log.timestamp.strftime('%d %b %Y %H:%M:%S') }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
