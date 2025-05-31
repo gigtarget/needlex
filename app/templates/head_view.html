@@ -1,66 +1,129 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Needle Tracker - Machine {{ machine_id }} Head {{ head_id }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Needle Tracker</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0 16px;
             text-align: center;
         }
-        img.logo {
-            width: 180px;
-            margin-bottom: 20px;
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+            padding: 24px 0;
         }
+
+        .logo {
+            width: 140px;
+            margin-bottom: 24px;
+        }
+
         h2 {
-            margin-bottom: 20px;
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: #333;
         }
+
+        form {
+            background-color: #fff;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
         label {
-            display: inline-block;
-            width: 130px;
-        }
-        select, input[type="radio"] {
-            margin-right: 10px;
-        }
-        .log-box {
-            background-color: #f2f2f2;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 30px;
+            display: block;
             text-align: left;
-            display: inline-block;
+            font-weight: bold;
+            margin-top: 16px;
+            color: #444;
+        }
+
+        select, input[type="radio"] {
+            font-size: 1rem;
+            padding: 10px;
+            width: 100%;
+            margin-top: 8px;
+            margin-bottom: 12px;
+        }
+
+        .radio-group {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 8px;
+        }
+
+        .radio-group label {
+            font-weight: normal;
+        }
+
+        button {
+            background-color: #0066cc;
+            color: white;
+            font-size: 1rem;
+            padding: 12px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .log-box {
+            margin-top: 24px;
+            text-align: left;
+            background: #fff;
+            padding: 16px;
+            border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        .log-box h3 {
+            margin-top: 0;
+            font-size: 1rem;
+        }
+
+        .log-box ul {
+            padding-left: 16px;
         }
     </style>
 </head>
 <body>
 
-    <!-- ✅ Logo Display -->
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+    <div class="container">
+        <img src="{{ url_for('static', filename='logo.png') }}" class="logo" alt="Logo">
 
-    <h2>Needle Change Log - Machine {{ machine_id }}, Head {{ head_id }}</h2>
+        <h2>Machine {{ machine_id }} – Head {{ head_id }}</h2>
 
-    <form method="POST">
-        <label>Needle Number:</label>
-        <select name="needle_number" required>
-            {% for i in range(1, 16) %}
-                <option value="{{ i }}">{{ i }}</option>
-            {% endfor %}
-        </select><br><br>
+        <form method="POST">
+            <label for="needle_number">Needle Number</label>
+            <select name="needle_number" id="needle_number" required>
+                {% for i in range(1, 16) %}
+                    <option value="{{ i }}">{{ i }}</option>
+                {% endfor %}
+            </select>
 
-        <label>Needle Type:</label>
-        <input type="radio" name="needle_type" value="11" required> 11
-        <input type="radio" name="needle_type" value="12" required> 12<br><br>
+            <label>Needle Type</label>
+            <div class="radio-group">
+                <label><input type="radio" name="needle_type" value="11" required> 11</label>
+                <label><input type="radio" name="needle_type" value="12" required> 12</label>
+            </div>
 
-        <button type="submit">Log Change</button>
-    </form>
+            <button type="submit">Log Needle Change</button>
+        </form>
 
-    <div class="log-box">
-        <h3>Latest Changes:</h3>
-        <ul>
-            {% for needle, log in last_change_dict.items() %}
-                <li>Needle {{ needle }} (Type {{ log.needle_type }}): {{ log.timestamp.strftime('%d %b %Y %H:%M:%S') }}</li>
-            {% endfor %}
-        </ul>
+        <div class="log-box">
+            <h3>Latest Changes:</h3>
+            <ul>
+                {% for needle, log in last_change_dict.items() %}
+                    <li>Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y %H:%M:%S') }}</li>
+                {% endfor %}
+            </ul>
+        </div>
     </div>
 
 </body>
