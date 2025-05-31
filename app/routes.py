@@ -6,7 +6,7 @@ main = Blueprint("main", __name__)
 
 @main.route("/")
 def home():
-    return "✅ Needle Tracker is Live. Go to /head/1/1 to get started."
+    return "✅ Needle Tracker is Live. Use /head/<machine_id>/<head_id> to log changes."
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 def head_view(machine_id, head_id):
@@ -42,4 +42,5 @@ def head_view(machine_id, head_id):
     return render_template("head_view.html",
                            machine_id=machine_id,
                            head_id=head_id,
-                           last_change_dict=last_change_dict)
+                           last_change_dict=last_change_dict,
+                           now=datetime.utcnow())
