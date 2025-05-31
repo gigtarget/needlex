@@ -4,15 +4,16 @@ from datetime import datetime
 
 main = Blueprint("main", __name__)
 
+@main.route("/")
+def home():
+    return "✅ Needle Tracker is Live. Go to /head/1/1 to get started."
+
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 def head_view(machine_id, head_id):
-    last_change = None
-
     if request.method == "POST":
         needle_number = int(request.form["needle_number"])
         needle_type = int(request.form["needle_type"])
 
-        # Save to DB
         change = NeedleChange(
             machine_id=machine_id,
             head_id=head_id,
@@ -25,7 +26,6 @@ def head_view(machine_id, head_id):
 
         return redirect(url_for("main.head_view", machine_id=machine_id, head_id=head_id))
 
-    # Get the last change per needle
     logs = (
         NeedleChange.query
         .filter_by(machine_id=machine_id, head_id=head_id)
@@ -37,7 +37,7 @@ def head_view(machine_id, head_id):
     for log in logs:
         key = log.needle_number
         if key not in last_change_dict:
-            last_change_dict[key] = log  # take the latest one
+            last_change_dict[key] = log
 
     return render_template("head_view.html",
                            machine_id=machine_id,
