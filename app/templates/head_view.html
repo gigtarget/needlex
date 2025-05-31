@@ -26,35 +26,24 @@
 
         .needle {
             width: 40px;
-            height: 100px;
-            background: white;
-            border: 2px solid #444;
-            border-radius: 4px;
+            height: 130px;
+            background: url('{{ url_for('static', filename='img/needle.png') }}') no-repeat center bottom;
+            background-size: contain;
             position: relative;
             cursor: pointer;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
+            padding-top: 10px;
             font-weight: bold;
             color: #444;
-        }
-
-        .needle::after {
-            content: "";
-            position: absolute;
-            bottom: -12px;
-            left: 10px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 14px solid #444;
+            transition: filter 0.2s ease, transform 0.2s ease;
         }
 
         .needle.selected {
-            background-color: #2ecc71;
-            border-color: #2ecc71;
-            color: white;
+            filter: brightness(0.7) sepia(1) hue-rotate(70deg) saturate(2);
+            color: #2ecc71;
+            transform: scale(1.05);
         }
 
         .type-buttons {
