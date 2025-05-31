@@ -1,169 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Needle Tracker</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f9f9f9;
-            text-align: center;
-            padding: 16px;
-        }
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Needle Tracker</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9f9f9;
+      text-align: center;
+      padding: 16px;
+    }
 
-        .logo {
-            width: 120px;
-            margin-bottom: 20px;
-        }
+    .logo {
+      width: 120px;
+      margin-bottom: 20px;
+    }
 
-        .needle-grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 8px;
-            margin: 20px 0;
-        }
+    .needle-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 20px 0;
+    }
 
-        .needle {
-            width: 40px;
-            height: 70px;
-            background: white;
-            border: 2px solid #444;
-            border-radius: 4px;
-            position: relative;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            color: #444;
-        }
+    .needle {
+      width: 20px;
+      height: 100px;
+      background: white;
+      border: 2px solid #444;
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #444;
+    }
 
-        .needle::after {
-            content: "";
-            position: absolute;
-            bottom: -12px;
-            left: 10px;
-            width: 0;
-            height: 0;
-            border-left: 10px solid transparent;
-            border-right: 10px solid transparent;
-            border-top: 14px solid #444;
-        }
+    .needle::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 10px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 14px solid #444;
+    }
 
-        .needle.selected {
-            background-color: #2ecc71;
-            border-color: #2ecc71;
-            color: white;
-        }
+    .needle.selected {
+      background-color: #2ecc71;
+      border-color: #2ecc71;
+      color: white;
+    }
 
-        .type-buttons {
-            margin: 16px 0;
-        }
+    .type-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 24px 0;
+    }
 
-        .type-buttons button {
-            padding: 12px 20px;
-            font-size: 1rem;
-            margin: 0 8px;
-            border: none;
-            border-radius: 6px;
-            background-color: #007bff;
-            color: white;
-        }
+    .type-btn {
+      width: 60px;
+      height: 100px;
+      background: white;
+      border: 2px solid #444;
+      border-radius: 4px;
+      position: relative;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #444;
+    }
 
-        #submit-btn {
-            margin-top: 16px;
-            padding: 12px 20px;
-            font-size: 1rem;
-            background-color: #222;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            width: 100%;
-        }
+    .type-btn::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 18px;
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 14px solid #444;
+    }
 
-        .log-box {
-            margin-top: 24px;
-            background: #fff;
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-            text-align: left;
-        }
+    .type-btn.selected {
+      background-color: #2ecc71;
+      border-color: #2ecc71;
+      color: white;
+    }
 
-        .log-box ul {
-            padding-left: 20px;
-        }
+    #submit-btn {
+      margin-top: 16px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      background-color: #222;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+    }
 
-        .log-box li {
-            padding: 6px;
-            margin: 4px 0;
-            border-radius: 4px;
-        }
-    </style>
+    .log-box {
+      margin-top: 24px;
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      text-align: left;
+    }
+
+    .log-box ul {
+      padding-left: 20px;
+    }
+
+    .log-box li {
+      padding: 6px;
+      margin: 4px 0;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
 
-    <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
+  <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
 
-    <h2>Machine {{ machine_id }} – Head {{ head_id }}</h2>
+  <h2>Machine {{ machine_id }} – Head {{ head_id }}</h2>
 
-    <form method="POST">
-        <!-- Needle selection visual -->
-        <div class="needle-grid">
-            {% for i in range(1, 16) %}
-                <div class="needle" data-id="{{ i }}">{{ i }}</div>
-            {% endfor %}
-        </div>
-
-        <input type="hidden" name="needle_number" id="needle_number" required>
-        <input type="hidden" name="needle_type" id="needle_type" required>
-
-        <!-- Type selector -->
-        <div class="type-buttons">
-            <button type="button" onclick="selectType(11)">11</button>
-            <button type="button" onclick="selectType(12)">12</button>
-        </div>
-
-        <button type="submit" id="submit-btn">Log Needle Change</button>
-    </form>
-
-    <div class="log-box">
-        <h3>Latest Changes:</h3>
-        <ul>
-            {% for needle in range(1, 16) %}
-                {% if last_change_dict.get(needle) %}
-                    {% set log = last_change_dict.get(needle) %}
-                    {% set days_old = (now - log.timestamp).days %}
-                    <li style="background-color: {% if days_old > 10 %}#fff3cd{% else %}#ffffff{% endif %};">
-                        Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y') }}
-                    </li>
-                {% else %}
-                    <li style="background-color: #ffffff;">
-                        Needle {{ needle }} – No data available
-                    </li>
-                {% endif %}
-            {% endfor %}
-        </ul>
+  <form method="POST">
+    <div class="needle-grid">
+      {% for i in range(1, 16) %}
+        <div class="needle" data-id="{{ i }}">{{ i }}</div>
+      {% endfor %}
     </div>
 
-    <script>
-        const needles = document.querySelectorAll('.needle');
-        const needleInput = document.getElementById('needle_number');
-        const typeInput = document.getElementById('needle_type');
+    <input type="hidden" name="needle_number" id="needle_number" required>
+    <input type="hidden" name="needle_type" id="needle_type" required>
 
-        needles.forEach(n => {
-            n.addEventListener('click', () => {
-                needles.forEach(m => m.classList.remove('selected'));
-                n.classList.add('selected');
-                needleInput.value = n.dataset.id;
-            });
-        });
+    <div class="type-buttons">
+      <div class="type-btn" data-type="11">11</div>
+      <div class="type-btn" data-type="12">12</div>
+    </div>
 
-        function selectType(val) {
-            typeInput.value = val;
-            alert("Selected Needle Type: " + val);
-        }
-    </script>
+    <button type="submit" id="submit-btn">Log Needle Change</button>
+  </form>
+
+  <div class="log-box">
+    <h3>Latest Changes:</h3>
+    <ul>
+      {% for needle in range(1, 16) %}
+        {% if last_change_dict.get(needle) %}
+          {% set log = last_change_dict.get(needle) %}
+          {% set days_old = (now - log.timestamp).days %}
+          <li style="background-color: {% if days_old > 10 %}#fff3cd{% else %}#ffffff{% endif %};">
+            Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y') }}
+          </li>
+        {% else %}
+          <li style="background-color: #ffffff;">
+            Needle {{ needle }} – No data available
+          </li>
+        {% endif %}
+      {% endfor %}
+    </ul>
+  </div>
+
+  <script>
+    const needles = document.querySelectorAll('.needle');
+    const types = document.querySelectorAll('.type-btn');
+    const needleInput = document.getElementById('needle_number');
+    const typeInput = document.getElementById('needle_type');
+
+    needles.forEach(n => {
+      n.addEventListener('click', () => {
+        needles.forEach(m => m.classList.remove('selected'));
+        n.classList.add('selected');
+        needleInput.value = n.dataset.id;
+      });
+    });
+
+    types.forEach(btn => {
+      btn.addEventListener('click', () => {
+        types.forEach(t => t.classList.remove('selected'));
+        btn.classList.add('selected');
+        typeInput.value = btn.dataset.type;
+      });
+    });
+  </script>
 </body>
 </html>
