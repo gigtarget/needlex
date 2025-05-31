@@ -1,130 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Needle Tracker</title>
     <style>
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f9f9f9;
-            margin: 0;
-            padding: 0 16px;
+            font-family: sans-serif;
+            background: #f9f9f9;
             text-align: center;
-        }
-
-        .container {
-            max-width: 500px;
-            margin: auto;
-            padding: 24px 0;
+            padding: 16px;
         }
 
         .logo {
-            width: 140px;
-            margin-bottom: 24px;
+            width: 120px;
+            margin-bottom: 20px;
         }
 
-        h2 {
-            font-size: 1.2rem;
-            margin-bottom: 16px;
-            color: #333;
-        }
-
-        form {
-            background-color: #fff;
-            padding: 16px;
-            border-radius: 10px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-        }
-
-        label {
-            display: block;
-            text-align: left;
-            font-weight: bold;
-            margin-top: 16px;
-            color: #444;
-        }
-
-        select, input[type="radio"] {
-            font-size: 1rem;
-            padding: 10px;
-            width: 100%;
-            margin-top: 8px;
-            margin-bottom: 12px;
-        }
-
-        .radio-group {
+        .needle-grid {
             display: flex;
-            justify-content: space-around;
-            margin-top: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            margin: 20px 0;
         }
 
-        .radio-group label {
-            font-weight: normal;
+        .needle {
+            width: 30px;
+            height: 100px;
+            background: white;
+            border: 2px solid #444;
+            border-radius: 4px;
+            position: relative;
+            cursor: pointer;
         }
 
-        button {
-            background-color: #0066cc;
-            color: white;
+        .needle::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 6px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 14px solid #444;
+        }
+
+        .needle.selected {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .type-buttons {
+            margin: 16px 0;
+        }
+
+        .type-buttons button {
+            padding: 12px 20px;
             font-size: 1rem;
-            padding: 12px;
-            width: 100%;
+            margin: 0 8px;
             border: none;
             border-radius: 6px;
-            margin-top: 20px;
+            background-color: #007bff;
+            color: white;
+        }
+
+        #submit-btn {
+            margin-top: 16px;
+            padding: 12px 20px;
+            font-size: 1rem;
+            background-color: #222;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            width: 100%;
         }
 
         .log-box {
             margin-top: 24px;
-            text-align: left;
             background: #fff;
             padding: 16px;
             border-radius: 10px;
             box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-        }
-
-        .log-box h3 {
-            margin-top: 0;
-            font-size: 1rem;
+            text-align: left;
         }
 
         .log-box ul {
-            padding-left: 16px;
+            padding-left: 20px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
+    <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
 
-        <h2>Machine {{ machine_id }} – Head {{ head_id }}</h2>
+    <h2>Machine {{ machine_id }} – Head {{ head_id }}</h2>
 
-        <form method="POST">
-            <label for="needle_number">Needle Number</label>
-            <select name="needle_number" id="needle_number" required>
-                {% for i in range(1, 16) %}
-                    <option value="{{ i }}">{{ i }}</option>
-                {% endfor %}
-            </select>
-
-            <label>Needle Type</label>
-            <div class="radio-group">
-                <label><input type="radio" name="needle_type" value="11" required> 11</label>
-                <label><input type="radio" name="needle_type" value="12" required> 12</label>
-            </div>
-
-            <button type="submit">Log Needle Change</button>
-        </form>
-
-        <div class="log-box">
-            <h3>Latest Changes:</h3>
-            <ul>
-                {% for needle, log in last_change_dict.items() %}
-                    <li>Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y %H:%M:%S') }}</li>
-                {% endfor %}
-            </ul>
+    <form method="POST">
+        <!-- Needle selection visual -->
+        <div class="needle-grid">
+            {% for i in range(1, 16) %}
+                <div class="needle" data-id="{{ i }}"></div>
+            {% endfor %}
         </div>
+
+        <input type="hidden" name="needle_number" id="needle_number" required>
+        <input type="hidden" name="needle_type" id="needle_type" required>
+
+        <!-- Type selector -->
+        <div class="type-buttons">
+            <button type="button" onclick="selectType(11)">11</button>
+            <button type="button" onclick="selectType(12)">12</button>
+        </div>
+
+        <button type="submit" id="submit-btn">Log Needle Change</button>
+    </form>
+
+    <div class="log-box">
+        <h3>Latest Changes:</h3>
+        <ul>
+            {% for needle, log in last_change_dict.items() %}
+                <li>Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y %H:%M:%S') }}</li>
+            {% endfor %}
+        </ul>
     </div>
 
+    <script>
+        const needles = document.querySelectorAll('.needle');
+        const needleInput = document.getElementById('needle_number');
+        const typeInput = document.getElementById('needle_type');
+
+        needles.forEach(n => {
+            n.addEventListener('click', () => {
+                needles.forEach(m => m.classList.remove('selected'));
+                n.classList.add('selected');
+                needleInput.value = n.dataset.id;
+            });
+        });
+
+        function selectType(val) {
+            typeInput.value = val;
+            alert("Selected Needle Type: " + val);
+        }
+    </script>
 </body>
 </html>
