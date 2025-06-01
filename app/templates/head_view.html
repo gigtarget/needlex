@@ -11,11 +11,9 @@
       padding: 0;
     }
 
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 12px 16px;
+    .header {
+      text-align: center;
+      padding: 12px 0 4px;
     }
 
     .logo {
@@ -23,7 +21,8 @@
     }
 
     .machine-head {
-      text-align: right;
+      text-align: left;
+      padding: 0 16px 10px;
     }
 
     .machine-head h2 {
@@ -171,15 +170,13 @@
     }
 
     @media screen and (max-width: 600px) {
-      .top-bar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+      .header {
+        text-align: center;
       }
 
       .machine-head {
         text-align: left;
-        width: 100%;
+        padding: 8px 16px;
       }
 
       .needle-grid {
@@ -209,12 +206,12 @@
 </head>
 <body>
 
-  <div class="top-bar">
+  <div class="header">
     <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
-    <div class="machine-head">
-      <h2>Machine {{ machine_id }}</h2>
-      <h2>Head {{ head_id }}</h2>
-    </div>
+  </div>
+  <div class="machine-head">
+    <h2>Machine {{ machine_id }}</h2>
+    <h2>Head {{ head_id }}</h2>
   </div>
 
   <div class="container">
