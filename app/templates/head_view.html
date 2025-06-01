@@ -38,7 +38,9 @@
       flex-wrap: wrap;
       justify-content: center;
       gap: 8px;
-      margin-bottom: 10px;
+      margin: 20px auto 10px auto; /* Added vertical spacing */
+      max-width: 100%;
+      padding: 8px 0;
     }
 
     .needle {
@@ -48,8 +50,8 @@
       border: 2px solid #444;
       border-top-left-radius: 15px;
       border-top-right-radius: 15px;
-      border-bottom-left-radius: 25px;
-      border-bottom-right-radius: 25px;
+      border-bottom-left-radius: 50px;
+      border-bottom-right-radius: 50px;
       position: relative;
       cursor: pointer;
       display: flex;
@@ -139,6 +141,24 @@
       padding: 6px;
       margin: 4px 0;
       border-radius: 4px;
+    }
+
+    /* Mobile-specific layout improvements */
+    @media screen and (max-width: 600px) {
+      .needle-grid {
+        margin-top: 30px;
+        gap: 10px;
+      }
+
+      .needle {
+        width: 34px;
+        height: 90px;
+      }
+
+      .type-btn {
+        width: 80px;
+        height: 40px;
+      }
     }
   </style>
 </head>
