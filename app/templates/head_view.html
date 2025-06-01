@@ -54,7 +54,7 @@
     }
 
     .needle {
-      width: 25px;
+      width: 35px;
       height: 100px;
       background: white;
       border: 2px solid #444;
@@ -68,19 +68,18 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      font-weight: bold;
       color: #444;
       transition: background 0.3s ease;
       font-size: 14px;
     }
 
     .needle .number {
-      font-size: 20px;
-      font-weight: bold;
+      font-size: 18px;
+      font-weight: 700;
     }
 
     .needle .date {
-      margin-top: 8px;
+      margin-top: 6px;
       font-size: 12px;
       line-height: 1.1;
     }
@@ -184,14 +183,18 @@
       }
 
       .needle-grid {
-        column-gap: 10px;
+        column-gap: 8px;
         row-gap: 26px;
         margin-top: 20px;
       }
 
       .needle {
-        width: 42px;
-        height: 90px;
+        width: 35px;
+        height: 100px;
+        border-top-left-radius: 35px;
+        border-top-right-radius: 35px;
+        border-bottom-left-radius: 60px;
+        border-bottom-right-radius: 60px;
       }
 
       .type-btn {
