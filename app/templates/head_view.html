@@ -7,15 +7,15 @@
     body {
       font-family: 'Segoe UI', sans-serif;
       background: #f9f9f9;
-      padding: 16px;
       margin: 0;
+      padding: 0;
     }
 
-    .header {
+    .top-bar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
+      padding: 12px 16px;
     }
 
     .logo {
@@ -24,13 +24,20 @@
 
     .machine-head {
       text-align: right;
+    }
+
+    .machine-head h2 {
+      margin: 0;
+      font-size: 1.2rem;
       font-weight: bold;
-      font-size: 1.3rem;
-      padding: 12px;
+    }
+
+    .container {
+      text-align: center;
+      padding: 0 16px;
     }
 
     h3 {
-      text-align: center;
       font-size: 1.2rem;
       font-weight: 600;
       margin: 20px 0 10px;
@@ -40,8 +47,9 @@
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 10px;
-      margin: 20px auto;
+      column-gap: 8px;
+      row-gap: 24px;
+      margin: 20px auto 10px auto;
       max-width: 100%;
     }
 
@@ -63,8 +71,18 @@
       font-weight: bold;
       color: #444;
       transition: background 0.3s ease;
-      padding: 6px 0;
+      font-size: 14px;
+    }
+
+    .needle .number {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .needle .date {
+      margin-top: 4px;
       font-size: 12px;
+      line-height: 1.1;
     }
 
     .needle::after {
@@ -98,7 +116,7 @@
     }
 
     .type-btn {
-      width: 80px;
+      width: 100px;
       height: 40px;
       border: 2px solid #444;
       border-radius: 6px;
@@ -135,6 +153,7 @@
       padding: 16px;
       border-radius: 10px;
       box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      text-align: left;
     }
 
     .log-box ul {
@@ -142,96 +161,106 @@
     }
 
     .log-box li {
-      padding: 6px 0;
+      padding: 6px;
       margin: 4px 0;
       border-radius: 4px;
-      list-style-type: none;
-      border-bottom: 1px dashed #ccc;
     }
 
-    /* Responsive Mobile */
+    .divider {
+      border-top: 1px solid #ccc;
+      margin: 10px 0;
+    }
+
     @media screen and (max-width: 600px) {
-      .header {
+      .top-bar {
         flex-direction: column;
         align-items: flex-start;
+        gap: 10px;
       }
 
       .machine-head {
         text-align: left;
-        padding-top: 10px;
-        font-size: 1.2rem;
+        width: 100%;
+      }
+
+      .needle-grid {
+        column-gap: 10px;
+        row-gap: 26px;
+        margin-top: 20px;
       }
 
       .needle {
-        width: 34px;
+        width: 42px;
         height: 90px;
-        font-size: 11px;
       }
 
       .type-btn {
-        width: 70px;
-        height: 38px;
+        width: 80px;
       }
 
       #submit-btn {
-        font-size: 0.9rem;
+        width: 100%;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="header">
+  <div class="top-bar">
     <img src="{{ url_for('static', filename='img/logo.png') }}" class="logo" alt="Logo">
     <div class="machine-head">
-      Machine {{ machine_id }}<br>
-      Head {{ head_id }}
+      <h2>Machine {{ machine_id }}</h2>
+      <h2>Head {{ head_id }}</h2>
     </div>
   </div>
 
-  <form method="POST">
-    <h3>Select Needle Number</h3>
-    <div class="needle-grid">
-      {% for i in range(1, 16) %}
-        {% set log = last_change_dict.get(i) %}
-        {% set is_stale = log and (now - log.timestamp).days > 10 %}
-        <div class="needle {% if is_stale %}stale{% endif %}" data-id="{{ i }}">
-          <div><strong>{{ i }}</strong></div>
-          {% if log %}
-            <div>{{ log.timestamp.strftime('%d') }}</div>
-            <div>{{ log.timestamp.strftime('%b') }}</div>
+  <div class="container">
+    <form method="POST">
+      <h3>Select Needle Number</h3>
+      <div class="needle-grid">
+        {% for i in range(1, 16) %}
+          {% set log = last_change_dict.get(i) %}
+          {% set is_stale = log and (now - log.timestamp).days > 10 %}
+          <div class="needle {% if is_stale %}stale{% endif %}" data-id="{{ i }}">
+            <div class="number">{{ i }}</div>
+            {% if log %}
+              <div class="date">{{ log.timestamp.strftime('%d') }}<br>{{ log.timestamp.strftime('%b') }}</div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <input type="hidden" name="needle_number" id="needle_number" required>
+      <input type="hidden" name="needle_type" id="needle_type" required>
+
+      <h3>Select Needle Type</h3>
+      <div class="type-buttons">
+        <div class="type-btn" data-type="11">11</div>
+        <div class="type-btn" data-type="12">12</div>
+      </div>
+
+      <button type="submit" id="submit-btn">Log Needle Change</button>
+    </form>
+
+    <div class="log-box">
+      <h3>Latest Changes:</h3>
+      <ul>
+        {% for needle in range(1, 16) %}
+          <div class="divider"></div>
+          {% if last_change_dict.get(needle) %}
+            {% set log = last_change_dict.get(needle) %}
+            {% set days_old = (now - log.timestamp).days %}
+            <li style="background-color: {% if days_old > 10 %}#fff3cd{% else %}#ffffff{% endif %};">
+              Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y') }}
+            </li>
+          {% else %}
+            <li style="background-color: #ffffff;">
+              Needle {{ needle }} – No data available
+            </li>
           {% endif %}
-        </div>
-      {% endfor %}
+        {% endfor %}
+      </ul>
     </div>
-
-    <input type="hidden" name="needle_number" id="needle_number" required>
-    <input type="hidden" name="needle_type" id="needle_type" required>
-
-    <h3>Select Needle Type</h3>
-    <div class="type-buttons">
-      <div class="type-btn" data-type="11">11</div>
-      <div class="type-btn" data-type="12">12</div>
-    </div>
-
-    <button type="submit" id="submit-btn">Log Needle Change</button>
-  </form>
-
-  <div class="log-box">
-    <h3 style="text-align:center;">Latest Changes:</h3>
-    <ul>
-      {% for needle in range(1, 16) %}
-        {% if last_change_dict.get(needle) %}
-          {% set log = last_change_dict.get(needle) %}
-          {% set days_old = (now - log.timestamp).days %}
-          <li style="background-color: {% if days_old > 10 %}#fff3cd{% else %}#ffffff{% endif %};">
-            Needle {{ needle }} (Type {{ log.needle_type }}) – {{ log.timestamp.strftime('%d %b %Y') }}
-          </li>
-        {% else %}
-          <li>Needle {{ needle }} – No data available</li>
-        {% endif %}
-      {% endfor %}
-    </ul>
   </div>
 
   <script>
@@ -256,5 +285,6 @@
       });
     });
   </script>
+
 </body>
 </html>
