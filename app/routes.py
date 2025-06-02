@@ -13,13 +13,18 @@ def home():
         return redirect(url_for('main.dashboard'))
     return redirect(url_for('auth.login'))
 
-
 @main.route("/dashboard")
 @login_required
 def dashboard():
-    return f"<h2>Welcome, {current_user.email} ({current_user.role})!</h2>" \
-           f"<p><a href='{url_for('auth.logout')}'>Logout</a></p>"
+    if current_user.role == "admin":
+        return redirect(url_for("admin.manage_machines"))
+    else:
+        return redirect(url_for("main.user_home"))
 
+@main.route("/user/home")
+@login_required
+def user_home():
+    return f"<h2>Welcome, {current_user.email}!</h2><p>You’re logged in as a user. Your dashboard will appear here soon.</p>"
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
