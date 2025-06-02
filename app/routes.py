@@ -4,6 +4,9 @@ from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import db, NeedleChange
 from datetime import datetime
+import qrcode
+import io
+import base64
 
 main = Blueprint("main", __name__)
 
@@ -29,11 +32,27 @@ def user_home():
 
     machines = current_user.machines
 
-    if len(machines) == 1:
-        machine = machines[0]
-        return render_template("user_dashboard.html", machine=machine)
+    if len(machines) != 1:
+        return "Multiple machine support coming soon."
 
-    return "Multiple machine support coming soon."  # Optional: show a dropdown later
+    machine = machines[0]
+    qr_map = {}
+
+    for head in machine.heads:
+        qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
+
+        qr = qrcode.QRCode(box_size=4, border=1)
+        qr.add_data(qr_url)
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = io.BytesIO()
+        img.save(buffer, format="PNG")
+        img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
+
+        qr_map[head.id] = img_str
+
+    return render_template("user_dashboard.html", machine=machine, qr_map=qr_map)
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
@@ -55,7 +74,7 @@ def head_view(machine_id, head_id):
 
     logs = (
         NeedleChange.query
-        .filter_by(head_id=head_id)  # ✅ FIXED
+        .filter_by(head_id=head_id)
         .order_by(NeedleChange.timestamp.desc())
         .all()
     )
