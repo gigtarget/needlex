@@ -1,72 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Manage Users – NeedleX</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 40px; max-width: 800px; margin: auto; }
-        h2 { margin-bottom: 10px; }
-        input, select, button {
-            padding: 10px;
-            width: 100%;
-            margin-top: 10px;
-            box-sizing: border-box;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-        }
-        th, td {
-            padding: 10px;
-            border-bottom: 1px solid #ccc;
-            text-align: left;
-        }
-        .logout {
-            float: right;
-            margin-top: -40px;
-        }
-    </style>
-</head>
-<body>
+{% extends "base_admin.html" %}
 
-    <h2>👤 Admin User Manager</h2>
-    <p>Welcome, {{ current_user.email }} ({{ current_user.role }})</p>
-    <p class="logout"><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+{% block content %}
+<h2>👤 Add User</h2>
 
-    <form method="POST">
-        <input type="email" name="email" placeholder="Enter user email" required>
-        <input type="password" name="password" placeholder="Enter password" required>
-        <select name="role" required>
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
-        </select>
-        <button type="submit">Add User</button>
-    </form>
+<form method="POST">
+    <input type="email" name="email" placeholder="User email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <select name="role">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+    </select>
+    <button type="submit">Create User</button>
+</form>
 
-    {% if users %}
-        <h3>📋 All Users</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.role }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No users found.</p>
-    {% endif %}
-
-</body>
-</html>
+{% if users %}
+<h3>📋 Existing Users</h3>
+<table border="1">
+    <tr>
+        <th>#</th>
+        <th>Email</th>
+        <th>Role</th>
+    </tr>
+    {% for user in users %}
+    <tr>
+        <td>{{ loop.index }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}
