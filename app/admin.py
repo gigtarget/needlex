@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
+from werkzeug.security import generate_password_hash
 from app.models import db, User, Machine, Head, NeedleChange
 
 admin = Blueprint("admin", __name__)
@@ -11,6 +12,10 @@ def admin_required(f):
         return f(*args, **kwargs)
     wrapper.__name__ = f.__name__
     return login_required(wrapper)
+
+# ------------------------
+# MACHINE MANAGEMENT
+# ------------------------
 
 @admin.route("/admin/machines", methods=["GET", "POST"])
 @admin_required
@@ -49,7 +54,6 @@ def manage_machines():
 def delete_machine(machine_id):
     machine = Machine.query.get_or_404(machine_id)
 
-    # Delete associated heads and changes
     for head in machine.heads:
         NeedleChange.query.filter_by(head_id=head.id).delete()
         db.session.delete(head)
@@ -72,3 +76,53 @@ def edit_machine(machine_id):
         return redirect(url_for("admin.manage_machines"))
 
     return render_template("edit_machine.html", machine=machine, users=users)
+
+# ------------------------
+# USER MANAGEMENT
+# ------------------------
+
+@admin.route("/admin/users", methods=["GET", "POST"])
+@admin_required
+def manage_users():
+    if request.method == "POST":
+        email = request.form["email"]
+        role = request.form["role"]
+
+        if User.query.filter_by(email=email).first():
+            return "User already exists."
+
+        new_user = User(email=email, password=generate_password_hash("default123"), role=role)
+        db.session.add(new_user)
+        db.session.commit()
+
+        return redirect(url_for("admin.manage_users"))
+
+    users = User.query.all()
+    return render_template("admin_users.html", users=users)
+
+
+@admin.route("/admin/edit_user/<int:user_id>", methods=["GET", "POST"])
+@admin_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if request.method == "POST":
+        user.email = request.form["email"]
+        user.role = request.form["role"]
+        db.session.commit()
+        return redirect(url_for("admin.manage_users"))
+
+    return render_template("edit_user.html", user=user)
+
+
+@admin.route("/admin/delete_user/<int:user_id>")
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+
+    if user.email == current_user.email:
+        return "You cannot delete your own account."
+
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for("admin.manage_users"))
