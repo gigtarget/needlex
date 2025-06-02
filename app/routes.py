@@ -24,7 +24,11 @@ def dashboard():
 @main.route("/user/home")
 @login_required
 def user_home():
-    return f"<h2>Welcome, {current_user.email}!</h2><p>You’re logged in as a user. Your dashboard will appear here soon.</p>"
+    if current_user.role != "user":
+        return redirect(url_for("main.dashboard"))
+
+    machines = current_user.machines  # via backref in Machine model
+    return render_template("user_dashboard.html", machines=machines)
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
