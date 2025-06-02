@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – NeedleX</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        nav {
+            background-color: #222;
+            padding: 10px 20px;
+            color: white;
+        }
+        nav a {
+            color: white;
+            margin-right: 20px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 40px;
+            max-width: 1000px;
+            margin: auto;
+        }
+        table, input, select, button {
+            width: 100%;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <span>NeedleX Admin Panel</span>
+        <a href="{{ url_for('admin.manage_machines') }}">🛠️ Machines</a>
+        <a href="{{ url_for('admin.manage_users') }}">👤 Users</a>
+        <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
