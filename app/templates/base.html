@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}NeedleX{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f9f9f9;
+        }
+
+        nav {
+            background-color: #222;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        nav .left a,
+        nav .right a {
+            color: white;
+            margin-right: 16px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        nav .right {
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            padding: 40px;
+            max-width: 1000px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="left">
+            <a href="
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                    {{ url_for('admin.manage_machines') }}
+                {% elif current_user.is_authenticated and current_user.role == 'user' %}
+                    {{ url_for('main.user_home') }}
+                {% else %}
+                    {{ url_for('auth.login') }}
+                {% endif %}
+            ">🏠 Home</a>
+        </div>
+        <div class="right">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="container">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</body>
+</html>
