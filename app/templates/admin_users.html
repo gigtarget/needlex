@@ -1,33 +1,136 @@
-{% extends "base_admin.html" %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin – Users</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f4;
+            padding: 40px 20px;
+            max-width: 700px;
+            margin: auto;
+        }
 
-{% block content %}
-<h2>👤 Add User</h2>
+        .panel {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
 
-<form method="POST">
-    <input type="email" name="email" placeholder="User email" required>
-    <input type="password" name="password" placeholder="Password" required>
-    <select name="role">
-        <option value="user">User</option>
-        <option value="admin">Admin</option>
-    </select>
-    <button type="submit">Create User</button>
-</form>
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
 
-{% if users %}
-<h3>📋 Existing Users</h3>
-<table border="1">
-    <tr>
-        <th>#</th>
-        <th>Email</th>
-        <th>Role</th>
-    </tr>
-    {% for user in users %}
-    <tr>
-        <td>{{ loop.index }}</td>
-        <td>{{ user.email }}</td>
-        <td>{{ user.role }}</td>
-    </tr>
-    {% endfor %}
-</table>
-{% endif %}
-{% endblock %}
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            background: #007bff;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+
+        .user-list {
+            margin-top: 30px;
+        }
+
+        .user-card {
+            background: #f9f9f9;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 6px;
+            border-left: 5px solid #007bff;
+        }
+
+        .user-card strong {
+            display: block;
+        }
+
+        .actions a {
+            margin-right: 12px;
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .actions a.delete {
+            color: red;
+        }
+
+        .logout {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .logout a {
+            color: purple;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h2>👤 Admin – User Management</h2>
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" name="email" required />
+            </div>
+
+            <div class="form-group">
+                <label>Role</label>
+                <select name="role">
+                    <option value="user">User</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+
+            <button class="btn" type="submit">Add New User</button>
+        </form>
+
+        <div class="user-list">
+            <h3>📋 Registered Users</h3>
+            {% for user in users %}
+                <div class="user-card">
+                    <strong>{{ user.email }}</strong>
+                    Role: {{ user.role }}<br>
+                    {% if user.machines %}
+                        Machines: {{ user.machines|length }}
+                    {% endif %}
+                    <div class="actions">
+                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}">Edit</a>
+                        <a href="{{ url_for('admin.delete_user', user_id=user.id) }}" class="delete">Delete</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
