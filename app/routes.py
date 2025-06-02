@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from app.models import db, NeedleChange
 from datetime import datetime
 import qrcode
+import io
+import base64
 import os
 
 main = Blueprint("main", __name__)
@@ -33,14 +35,16 @@ def user_home():
         return "Multiple machine support coming soon."
 
     machine = machines[0]
+
     qr_folder = os.path.join("app", "static", "qr_codes")
+    os.makedirs(qr_folder, exist_ok=True)
+
     qr_map = {}
 
     for head in machine.heads:
         qr_filename = f"qr_machine_{machine.id}_head_{head.id}.png"
         qr_path = os.path.join(qr_folder, qr_filename)
 
-        # If QR image doesn't exist, create it
         if not os.path.exists(qr_path):
             qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
             qr = qrcode.QRCode(box_size=4, border=1)
