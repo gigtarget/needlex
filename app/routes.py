@@ -1,12 +1,9 @@
-# app/routes.py
-
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from app.models import db, NeedleChange
 from datetime import datetime
 import qrcode
-import io
-import base64
+import os
 
 main = Blueprint("main", __name__)
 
@@ -36,21 +33,23 @@ def user_home():
         return "Multiple machine support coming soon."
 
     machine = machines[0]
+    qr_folder = os.path.join("app", "static", "qr_codes")
     qr_map = {}
 
     for head in machine.heads:
-        qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
+        qr_filename = f"qr_machine_{machine.id}_head_{head.id}.png"
+        qr_path = os.path.join(qr_folder, qr_filename)
 
-        qr = qrcode.QRCode(box_size=4, border=1)
-        qr.add_data(qr_url)
-        qr.make(fit=True)
+        # If QR image doesn't exist, create it
+        if not os.path.exists(qr_path):
+            qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
+            qr = qrcode.QRCode(box_size=4, border=1)
+            qr.add_data(qr_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            img.save(qr_path)
 
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffer = io.BytesIO()
-        img.save(buffer, format="PNG")
-        img_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
-
-        qr_map[head.id] = img_str
+        qr_map[head.id] = qr_filename
 
     return render_template("user_dashboard.html", machine=machine, qr_map=qr_map)
 
