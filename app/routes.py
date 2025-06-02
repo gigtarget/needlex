@@ -27,8 +27,13 @@ def user_home():
     if current_user.role != "user":
         return redirect(url_for("main.dashboard"))
 
-    machines = current_user.machines  # Thanks to backref
-    return render_template("user_dashboard.html", machines=machines)
+    machines = current_user.machines
+
+    if len(machines) == 1:
+        machine = machines[0]
+        return render_template("user_dashboard.html", machine=machine)
+
+    return "Multiple machine support coming soon."  # Optional: show a dropdown later
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
@@ -50,7 +55,7 @@ def head_view(machine_id, head_id):
 
     logs = (
         NeedleChange.query
-        .filter_by(head_id=head_id)  # ✅ FIXED: removed machine_id
+        .filter_by(head_id=head_id)  # ✅ FIXED
         .order_by(NeedleChange.timestamp.desc())
         .all()
     )
