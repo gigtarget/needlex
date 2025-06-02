@@ -9,11 +9,10 @@
             background-color: #f2f2f2;
             margin: 0;
             padding: 30px;
-            color: #333;
         }
 
         .container {
-            max-width: 700px;
+            max-width: 800px;
             margin: auto;
             background: #fff;
             padding: 30px;
@@ -23,14 +22,44 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 25px;
         }
 
         .welcome {
             text-align: center;
-            margin-bottom: 30px;
-            font-size: 1rem;
-            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            background: #007bff;
+            color: white;
+        }
+
+        .form-section,
+        .machine-list,
+        .user-list {
+            display: none;
+        }
+
+        .active-section {
+            display: block;
         }
 
         label {
@@ -42,20 +71,20 @@
         input, select {
             width: 100%;
             padding: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             border-radius: 6px;
             border: 1px solid #ccc;
             background: #f9f9f9;
         }
 
         .btn {
+            width: 100%;
             background-color: #007bff;
             color: white;
-            border: none;
             padding: 12px;
             font-size: 1rem;
+            border: none;
             border-radius: 6px;
-            width: 100%;
             cursor: pointer;
         }
 
@@ -63,16 +92,30 @@
             background-color: #0056b3;
         }
 
-        .machine-list {
-            margin-top: 30px;
-        }
-
         .machine-card {
             background: #f4f4f4;
-            border-radius: 8px;
             padding: 15px;
+            border-radius: 8px;
             margin-bottom: 15px;
             border-left: 5px solid #007bff;
+            position: relative;
+        }
+
+        .actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .actions a {
+            margin-left: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .actions a.delete {
+            color: red;
         }
 
         .logout {
@@ -95,36 +138,64 @@
         Welcome, {{ current_user.email }} (admin)
     </div>
 
-    <form method="POST">
-        <label for="machine_name">Machine Name</label>
-        <input type="text" name="machine_name" placeholder="e.g. Tajima 1" required>
+    <div class="tabs">
+        <button class="tab active" onclick="toggleTab('machines')">Machines</button>
+        <button class="tab" onclick="toggleTab('users')">Users</button>
+    </div>
 
-        <label for="assigned_user">Assign to user</label>
-        <select name="assigned_user" required>
-            <option value="">-- Select User --</option>
-            {% for user in users %}
-                <option value="{{ user.id }}">{{ user.email }}</option>
-            {% endfor %}
-        </select>
+    <!-- Add Machine Form -->
+    <div id="machines" class="form-section active-section">
+        <form method="POST">
+            <label>Machine Name</label>
+            <input type="text" name="machine_name" placeholder="e.g. Tajima 1" required>
 
-        <label for="head_count">Number of Heads</label>
-        <input type="number" name="head_count" min="1" max="15" placeholder="e.g. 8" required>
+            <label>Assign to user</label>
+            <select name="assigned_user" required>
+                <option value="">-- Select User --</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.email }}</option>
+                {% endfor %}
+            </select>
 
-        <button type="submit" class="btn">Add Machine</button>
-    </form>
+            <label>Number of Heads</label>
+            <input type="number" name="head_count" placeholder="e.g. 8" min="1" max="15" required>
 
-    <div class="machine-list">
-        <h3>📋 Machines</h3>
-        {% if machines %}
-            {% for machine in machines %}
+            <button type="submit" class="btn">Add Machine</button>
+        </form>
+
+        <div class="machine-list">
+            <h3>📋 Machines</h3>
+            {% if machines %}
+                {% for machine in machines %}
                 <div class="machine-card">
                     <strong>{{ machine.name }}</strong><br>
                     Heads: {{ machine.heads|length }}<br>
+                    Needle Changes: {{ needle_counts[machine.id] }}<br>
                     Assigned to: {{ machine.owner.email }}
+
+                    <div class="actions">
+                        <a href="{{ url_for('admin.edit_machine', machine_id=machine.id) }}">✏️ Edit</a>
+                        <a class="delete" href="{{ url_for('admin.delete_machine', machine_id=machine.id) }}" onclick="return confirm('Are you sure you want to delete this machine?');">🗑️ Delete</a>
+                    </div>
                 </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <p>No machines added yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- User List -->
+    <div id="users" class="user-list">
+        <h3>👤 Registered Users</h3>
+        {% if users %}
+            <ul>
+                {% for user in users %}
+                    <li>{{ user.email }} ({{ user.role }})</li>
+                {% endfor %}
+            </ul>
         {% else %}
-            <p>No machines added yet.</p>
+            <p>No users found.</p>
         {% endif %}
     </div>
 
@@ -132,6 +203,16 @@
         <a href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 </div>
+
+<script>
+    function toggleTab(tab) {
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.form-section, .user-list').forEach(sec => sec.classList.remove('active-section'));
+
+        document.getElementById(tab).classList.add('active-section');
+        event.target.classList.add('active');
+    }
+</script>
 
 </body>
 </html>
