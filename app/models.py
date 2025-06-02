@@ -16,6 +16,7 @@ class Machine(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship('User', backref='machines')  # ✅ Required for template
     heads = db.relationship('Head', backref='machine', cascade="all, delete-orphan")
 
 class Head(db.Model):
