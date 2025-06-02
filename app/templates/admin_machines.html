@@ -37,29 +37,20 @@
             margin-bottom: 20px;
         }
 
-        .tab {
+        .tab-link {
             padding: 10px 20px;
             margin: 0 5px;
             border: none;
             background: #eee;
-            cursor: pointer;
             border-radius: 6px;
             font-weight: bold;
+            text-decoration: none;
+            color: #000;
         }
 
-        .tab.active {
+        .tab-link.active {
             background: #007bff;
             color: white;
-        }
-
-        .form-section,
-        .machine-list,
-        .user-list {
-            display: none;
-        }
-
-        .active-section {
-            display: block;
         }
 
         label {
@@ -138,64 +129,50 @@
         Welcome, {{ current_user.email }} (admin)
     </div>
 
+    <!-- Tab Navigation -->
     <div class="tabs">
-        <button class="tab active" onclick="toggleTab('machines')">Machines</button>
-        <button class="tab" onclick="toggleTab('users')">Users</button>
+        <a href="{{ url_for('admin.manage_machines') }}" class="tab-link {% if request.path.endswith('/machines') %}active{% endif %}">Machines</a>
+        <a href="{{ url_for('admin.manage_users') }}" class="tab-link {% if request.path.endswith('/users') %}active{% endif %}">Users</a>
     </div>
 
     <!-- Add Machine Form -->
-    <div id="machines" class="form-section active-section">
-        <form method="POST">
-            <label>Machine Name</label>
-            <input type="text" name="machine_name" placeholder="e.g. Tajima 1" required>
+    <form method="POST">
+        <label>Machine Name</label>
+        <input type="text" name="machine_name" placeholder="e.g. Tajima 1" required>
 
-            <label>Assign to user</label>
-            <select name="assigned_user" required>
-                <option value="">-- Select User --</option>
-                {% for user in users %}
-                    <option value="{{ user.id }}">{{ user.email }}</option>
-                {% endfor %}
-            </select>
+        <label>Assign to user</label>
+        <select name="assigned_user" required>
+            <option value="">-- Select User --</option>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.email }}</option>
+            {% endfor %}
+        </select>
 
-            <label>Number of Heads</label>
-            <input type="number" name="head_count" placeholder="e.g. 8" min="1" max="15" required>
+        <label>Number of Heads</label>
+        <input type="number" name="head_count" placeholder="e.g. 8" min="1" max="15" required>
 
-            <button type="submit" class="btn">Add Machine</button>
-        </form>
+        <button type="submit" class="btn">Add Machine</button>
+    </form>
 
-        <div class="machine-list">
-            <h3>📋 Machines</h3>
-            {% if machines %}
-                {% for machine in machines %}
-                <div class="machine-card">
-                    <strong>{{ machine.name }}</strong><br>
-                    Heads: {{ machine.heads|length }}<br>
-                    Needle Changes: {{ needle_counts[machine.id] }}<br>
-                    Assigned to: {{ machine.owner.email }}
+    <!-- Machine List -->
+    <div class="machine-list">
+        <h3>📋 Machines</h3>
+        {% if machines %}
+            {% for machine in machines %}
+            <div class="machine-card">
+                <strong>{{ machine.name }}</strong><br>
+                Heads: {{ machine.heads|length }}<br>
+                Needle Changes: {{ needle_counts[machine.id] }}<br>
+                Assigned to: {{ machine.owner.email }}
 
-                    <div class="actions">
-                        <a href="{{ url_for('admin.edit_machine', machine_id=machine.id) }}">✏️ Edit</a>
-                        <a class="delete" href="{{ url_for('admin.delete_machine', machine_id=machine.id) }}" onclick="return confirm('Are you sure you want to delete this machine?');">🗑️ Delete</a>
-                    </div>
+                <div class="actions">
+                    <a href="{{ url_for('admin.edit_machine', machine_id=machine.id) }}">✏️ Edit</a>
+                    <a class="delete" href="{{ url_for('admin.delete_machine', machine_id=machine.id) }}" onclick="return confirm('Are you sure you want to delete this machine?');">🗑️ Delete</a>
                 </div>
-                {% endfor %}
-            {% else %}
-                <p>No machines added yet.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- User List -->
-    <div id="users" class="user-list">
-        <h3>👤 Registered Users</h3>
-        {% if users %}
-            <ul>
-                {% for user in users %}
-                    <li>{{ user.email }} ({{ user.role }})</li>
-                {% endfor %}
-            </ul>
+            </div>
+            {% endfor %}
         {% else %}
-            <p>No users found.</p>
+            <p>No machines added yet.</p>
         {% endif %}
     </div>
 
@@ -203,16 +180,6 @@
         <a href="{{ url_for('auth.logout') }}">Logout</a>
     </div>
 </div>
-
-<script>
-    function toggleTab(tab) {
-        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.form-section, .user-list').forEach(sec => sec.classList.remove('active-section'));
-
-        document.getElementById(tab).classList.add('active-section');
-        event.target.classList.add('active');
-    }
-</script>
 
 </body>
 </html>
