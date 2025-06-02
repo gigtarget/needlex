@@ -1,13 +1,10 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
 from werkzeug.security import generate_password_hash
 from app.models import db, User, Machine, Head, NeedleChange
 
 admin = Blueprint("admin", __name__)
 
-# ------------------------
-# Auth Guard for Admin Only
-# ------------------------
 def admin_required(f):
     def wrapper(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != "admin":
@@ -15,7 +12,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     wrapper.__name__ = f.__name__
     return login_required(wrapper)
-
 
 # ------------------------
 # MACHINE MANAGEMENT
@@ -38,12 +34,12 @@ def manage_machines():
             db.session.add(head)
         db.session.commit()
 
-        flash("Machine added successfully.")
         return redirect(url_for("admin.manage_machines"))
 
     machines = Machine.query.all()
     users = User.query.all()
 
+    # Count needle changes per machine
     needle_counts = {}
     for machine in machines:
         head_ids = [head.id for head in machine.heads]
@@ -64,7 +60,6 @@ def delete_machine(machine_id):
 
     db.session.delete(machine)
     db.session.commit()
-    flash("Machine deleted.")
     return redirect(url_for("admin.manage_machines"))
 
 
@@ -78,7 +73,6 @@ def edit_machine(machine_id):
         machine.name = request.form["machine_name"]
         machine.owner_id = request.form["assigned_user"]
         db.session.commit()
-        flash("Machine updated.")
         return redirect(url_for("admin.manage_machines"))
 
     return render_template("edit_machine.html", machine=machine, users=users)
@@ -96,13 +90,16 @@ def manage_users():
         role = request.form["role"]
 
         if User.query.filter_by(email=email).first():
-            flash("User already exists.")
-            return redirect(url_for("admin.manage_users"))
+            return "User already exists."
 
-        new_user = User(email=email, password=generate_password_hash("default123"), role=role)
+        new_user = User(
+            email=email,
+            password=generate_password_hash("default123"),  # Default password
+            role=role
+        )
         db.session.add(new_user)
         db.session.commit()
-        flash("User created with default password: default123")
+
         return redirect(url_for("admin.manage_users"))
 
     users = User.query.all()
@@ -118,12 +115,11 @@ def edit_user(user_id):
         user.email = request.form["email"]
         user.role = request.form["role"]
 
-        new_password = request.form.get("password")
-        if new_password:
-            user.password = generate_password_hash(new_password)
+        password = request.form.get("password")
+        if password:
+            user.password = generate_password_hash(password)
 
         db.session.commit()
-        flash("User updated successfully.")
         return redirect(url_for("admin.manage_users"))
 
     return render_template("edit_user.html", user=user)
@@ -135,10 +131,8 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
 
     if user.email == current_user.email:
-        flash("You cannot delete your own account.")
-        return redirect(url_for("admin.manage_users"))
+        return "You cannot delete your own account."
 
     db.session.delete(user)
     db.session.commit()
-    flash("User deleted.")
     return redirect(url_for("admin.manage_users"))
