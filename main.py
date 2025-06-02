@@ -1,10 +1,2 @@
 # main.py
-
-from app import create_app
-import os
-
-app = create_app()
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Railway uses PORT env variable
-    app.run(host="0.0.0.0", port=port, debug=True)
+from init_db import app  # TEMP for DB init
