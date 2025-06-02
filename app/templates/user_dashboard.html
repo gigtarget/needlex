@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Your Dashboard – NeedleX</title>
+    <style>
+        body { font-family: Arial; padding: 40px; max-width: 900px; margin: auto; }
+        h2 { margin-bottom: 10px; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+<h2>Welcome, {{ current_user.email }} 👋</h2>
+
+{% if machines %}
+    <h3>🧵 Your Machines</h3>
+    <ul>
+        {% for machine in machines %}
+            <li>
+                <strong>{{ machine.name }}</strong>
+                <ul>
+                    {% for head in machine.heads %}
+                        <li>Head {{ head.number }} – 
+                            <a href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">
+                                Log/View Needles
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No machines assigned yet.</p>
+{% endif %}
+
+<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+
+</body>
+</html>
