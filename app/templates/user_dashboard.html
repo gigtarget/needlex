@@ -1,41 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Your Dashboard – NeedleX</title>
+    <title>NeedleX – Your Dashboard</title>
     <style>
-        body { font-family: Arial; padding: 40px; max-width: 900px; margin: auto; }
-        h2 { margin-bottom: 10px; }
-        ul { padding-left: 20px; }
-        li { margin-bottom: 8px; }
+        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; }
+        h2 { margin-bottom: 20px; }
+        .head-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        .head-box {
+            width: 100px;
+            height: 120px;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-decoration: none;
+            background: #f8f8f8;
+            color: #000;
+            transition: 0.2s;
+        }
+        .head-box:hover {
+            background: #dfefff;
+            border-color: #007bff;
+            color: #007bff;
+        }
+        .logout {
+            margin-top: 40px;
+        }
     </style>
 </head>
 <body>
 
-<h2>Welcome, {{ current_user.email }} 👋</h2>
+<h2>🧵 Welcome, {{ current_user.email }}</h2>
+<h3>Machine: <strong>{{ machine.name }}</strong></h3>
 
-{% if machines %}
-    <h3>🧵 Your Machines</h3>
-    <ul>
-        {% for machine in machines %}
-            <li>
-                <strong>{{ machine.name }}</strong>
-                <ul>
-                    {% for head in machine.heads %}
-                        <li>Head {{ head.number }} – 
-                            <a href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">
-                                Log/View Needles
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No machines assigned yet.</p>
-{% endif %}
+<div class="head-grid">
+    {% for head in machine.heads %}
+        <a class="head-box" href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">
+            Head {{ head.number }}
+        </a>
+    {% endfor %}
+</div>
 
-<p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+<p class="logout"><a href="{{ url_for('auth.logout') }}">Logout</a></p>
 
 </body>
 </html>
