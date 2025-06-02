@@ -3,9 +3,10 @@
 from flask import Flask
 from flask_login import LoginManager
 from app.models import db, User
+import os
 
 login_manager = LoginManager()
-login_manager.login_view = 'auth.login'  # Redirect to login if not logged in
+login_manager.login_view = 'auth.login'  # Redirect if not logged in
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -14,12 +15,14 @@ def load_user(user_id):
 def create_app():
     app = Flask(__name__)
 
-    # Config for Railway (or .env fallback)
-    app.config['SECRET_KEY'] = 'your-secret-key'  # Replace or load from env
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Change to PostgreSQL on Railway
+    # Secret key for sessions
+    app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+
+    # Use PostgreSQL on Railway or fallback to local SQLite
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Init extensions
+    # Initialize extensions
     db.init_app(app)
     login_manager.init_app(app)
 
