@@ -27,7 +27,7 @@ def user_home():
     if current_user.role != "user":
         return redirect(url_for("main.dashboard"))
 
-    machines = current_user.machines  # via backref in Machine model
+    machines = current_user.machines  # Thanks to backref
     return render_template("user_dashboard.html", machines=machines)
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
@@ -38,7 +38,6 @@ def head_view(machine_id, head_id):
         needle_type = int(request.form["needle_type"])
 
         change = NeedleChange(
-            machine_id=machine_id,
             head_id=head_id,
             needle_number=needle_number,
             needle_type=needle_type,
@@ -51,7 +50,7 @@ def head_view(machine_id, head_id):
 
     logs = (
         NeedleChange.query
-        .filter_by(machine_id=machine_id, head_id=head_id)
+        .filter_by(head_id=head_id)  # ✅ FIXED: removed machine_id
         .order_by(NeedleChange.timestamp.desc())
         .all()
     )
