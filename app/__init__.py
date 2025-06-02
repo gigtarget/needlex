@@ -1,19 +1,33 @@
+# app/__init__.py
+
 from flask import Flask
-from app.routes import main
-from app.db import init_db
-import os
+from flask_login import LoginManager
+from app.models import db, User
+
+login_manager = LoginManager()
+login_manager.login_view = 'auth.login'  # Redirect to login if not logged in
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 def create_app():
     app = Flask(__name__)
 
-    # 🔐 Use SECRET_KEY from Railway or fallback if not set
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "fallback123")
+    # Config for Railway (or .env fallback)
+    app.config['SECRET_KEY'] = 'your-secret-key'  # Replace or load from env
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'  # Change to PostgreSQL on Railway
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # 🛢️ Use PostgreSQL from Railway environment variable
-    app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    # Init extensions
+    db.init_app(app)
+    login_manager.init_app(app)
 
-    init_db(app)
-    app.register_blueprint(main)
+    # Import and register Blueprints
+    from app.auth import auth as auth_blueprint
+    app.register_blueprint(auth_blueprint)
+
+    from app.routes import main as main_blueprint
+    app.register_blueprint(main_blueprint)
 
     return app
