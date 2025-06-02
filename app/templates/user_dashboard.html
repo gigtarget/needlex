@@ -25,25 +25,27 @@
             margin-top: 30px;
         }
 
-        .head-box {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 130px;
-            padding: 16px;
-            border: 2px solid #007bff;
-            border-radius: 12px;
-            background: white;
-            text-decoration: none;
-            color: #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+        .head-box-wrapper {
+            position: relative;
+            width: 150px;
+            text-align: center;
         }
 
-        .head-box:hover {
+        .head-box-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border: 2px solid #007bff;
+            border-radius: 12px;
+            padding: 16px;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(0,0,0,0.05);
+            transition: 0.2s ease-in-out;
+        }
+
+        .head-box-link:hover {
             transform: translateY(-2px);
-            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
         .head-title {
@@ -54,24 +56,20 @@
         }
 
         .qr-img {
-            width: 80px;
-            height: 80px;
-            margin-bottom: 8px;
-        }
-
-        .download-btn-wrapper {
-            width: 100%;
+            width: 100px;
+            height: 100px;
+            margin-bottom: 10px;
         }
 
         .download-btn {
+            margin-top: 8px;
             background-color: #28a745;
             color: white;
-            border: none;
             padding: 6px 12px;
-            border-radius: 6px;
             font-size: 0.85rem;
+            border: none;
+            border-radius: 6px;
             cursor: pointer;
-            width: 100%;
         }
 
         .logout {
@@ -86,7 +84,7 @@
         }
 
         @media (max-width: 600px) {
-            .head-box {
+            .head-box-wrapper {
                 width: 45%;
             }
         }
@@ -99,19 +97,21 @@
 
 <div class="head-grid">
     {% for head in machine.heads %}
-    <a class="head-box" href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">
-        <div class="head-title">Head {{ head.number }}</div>
-        <img class="qr-img" src="{{ url_for('static', filename='qr_codes/' ~ qr_map[head.id]) }}" alt="QR Code">
-        <div class="download-btn-wrapper">
-            <a href="{{ url_for('static', filename='qr_codes/' ~ qr_map[head.id]) }}" download>
-                <button class="download-btn">Download</button>
-            </a>
-        </div>
-    </a>
+    <div class="head-box-wrapper">
+        <a class="head-box-link" href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">
+            <div class="head-title">Head {{ head.number }}</div>
+            <img class="qr-img" src="{{ url_for('static', filename='qr_codes/' ~ qr_map[head.id]) }}" alt="QR Code">
+        </a>
+        <a href="{{ url_for('static', filename='qr_codes/' ~ qr_map[head.id]) }}" download>
+            <button class="download-btn">Download</button>
+        </a>
+    </div>
     {% endfor %}
 </div>
 
-<p class="logout"><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+<div class="logout">
+    <p><a href="{{ url_for('auth.logout') }}">Logout</a></p>
+</div>
 
 </body>
 </html>
