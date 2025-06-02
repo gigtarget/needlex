@@ -1,14 +1,28 @@
+# app/routes.py
+
 from flask import Blueprint, render_template, request, redirect, url_for
-from app.db import db, NeedleChange
+from flask_login import login_required, current_user
+from app.models import db, NeedleChange
 from datetime import datetime
 
 main = Blueprint("main", __name__)
 
 @main.route("/")
 def home():
-    return "✅ Needle Tracker is Live. Use /head/<machine_id>/<head_id> to log changes."
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+    return redirect(url_for('auth.login'))
+
+
+@main.route("/dashboard")
+@login_required
+def dashboard():
+    return f"<h2>Welcome, {current_user.email} ({current_user.role})!</h2>" \
+           f"<p><a href='{url_for('auth.logout')}'>Logout</a></p>"
+
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
+@login_required
 def head_view(machine_id, head_id):
     if request.method == "POST":
         needle_number = int(request.form["needle_number"])
