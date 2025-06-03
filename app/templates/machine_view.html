@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Machine Heads – NeedleX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .head-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .head-card {
+            width: 150px;
+            text-align: center;
+        }
+
+        .head-card img {
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            margin-bottom: 8px;
+        }
+
+        .head-card a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .logout {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .logout a {
+            color: #800080;
+            font-weight: bold;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>🧵 Heads for Machine: {{ machine.name }}</h2>
+
+    <div class="head-list">
+        {% for head in machine.heads %}
+        <div class="head-card">
+            <img src="{{ url_for('static', filename='qr_codes/' + qr_map[head.id]) }}" alt="QR for Head {{ head.number }}">
+            <div>Head {{ head.number }}</div>
+            <a href="{{ url_for('main.head_view', machine_id=machine.id, head_id=head.id) }}">Go to Head</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="logout">
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
+</div>
+</body>
+</html>
