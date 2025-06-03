@@ -142,7 +142,7 @@
 
         <label>Assign to user</label>
         <select name="assigned_user" required>
-            <option value="">-- Select User --</option>
+            <option value="{{ current_user.id }}">Myself ({{ current_user.email }})</option>
             {% for user in users %}
                 <option value="{{ user.id }}">{{ user.email }}</option>
             {% endfor %}
