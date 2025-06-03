@@ -17,6 +17,15 @@ def admin_required(f):
     return login_required(wrapper)
 
 # ------------------------
+# ADMIN DASHBOARD
+# ------------------------
+@admin.route("/admin/dashboard")
+@admin_required
+def admin_dashboard():
+    machines = Machine.query.filter_by(owner_id=current_user.id).all()
+    return render_template("admin_dashboard.html", machines=machines)
+
+# ------------------------
 # MACHINE MANAGEMENT
 # ------------------------
 @admin.route("/admin/machines", methods=["GET", "POST"])
