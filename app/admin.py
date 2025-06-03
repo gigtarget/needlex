@@ -5,6 +5,9 @@ from app.models import db, User, Machine, Head, NeedleChange
 
 admin = Blueprint("admin", __name__)
 
+# ------------------------
+# Admin Access Decorator
+# ------------------------
 def admin_required(f):
     def wrapper(*args, **kwargs):
         if not current_user.is_authenticated or current_user.role != "admin":
@@ -16,13 +19,12 @@ def admin_required(f):
 # ------------------------
 # MACHINE MANAGEMENT
 # ------------------------
-
 @admin.route("/admin/machines", methods=["GET", "POST"])
 @admin_required
 def manage_machines():
     if request.method == "POST":
         name = request.form["machine_name"]
-        owner_id = request.form["assigned_user"]
+        owner_id = int(request.form["assigned_user"])
         head_count = int(request.form["head_count"])
 
         new_machine = Machine(name=name, owner_id=owner_id)
@@ -32,14 +34,13 @@ def manage_machines():
         for i in range(1, head_count + 1):
             head = Head(number=i, machine_id=new_machine.id)
             db.session.add(head)
-        db.session.commit()
 
+        db.session.commit()
         return redirect(url_for("admin.manage_machines"))
 
     machines = Machine.query.all()
     users = User.query.all()
 
-    # Count needle changes per machine
     needle_counts = {}
     for machine in machines:
         head_ids = [head.id for head in machine.heads]
@@ -48,6 +49,19 @@ def manage_machines():
 
     return render_template("admin_machines.html", machines=machines, users=users, needle_counts=needle_counts)
 
+@admin.route("/admin/edit_machine/<int:machine_id>", methods=["GET", "POST"])
+@admin_required
+def edit_machine(machine_id):
+    machine = Machine.query.get_or_404(machine_id)
+    users = User.query.all()
+
+    if request.method == "POST":
+        machine.name = request.form["machine_name"]
+        machine.owner_id = int(request.form["assigned_user"])
+        db.session.commit()
+        return redirect(url_for("admin.manage_machines"))
+
+    return render_template("edit_machine.html", machine=machine, users=users)
 
 @admin.route("/admin/delete_machine/<int:machine_id>")
 @admin_required
@@ -62,39 +76,23 @@ def delete_machine(machine_id):
     db.session.commit()
     return redirect(url_for("admin.manage_machines"))
 
-
-@admin.route("/admin/edit_machine/<int:machine_id>", methods=["GET", "POST"])
-@admin_required
-def edit_machine(machine_id):
-    machine = Machine.query.get_or_404(machine_id)
-    users = User.query.all()
-
-    if request.method == "POST":
-        machine.name = request.form["machine_name"]
-        machine.owner_id = request.form["assigned_user"]
-        db.session.commit()
-        return redirect(url_for("admin.manage_machines"))
-
-    return render_template("edit_machine.html", machine=machine, users=users)
-
-
 # ------------------------
 # USER MANAGEMENT
 # ------------------------
-
 @admin.route("/admin/users", methods=["GET", "POST"])
 @admin_required
 def manage_users():
     if request.method == "POST":
         email = request.form["email"]
         role = request.form["role"]
+        password = request.form["password"]
 
         if User.query.filter_by(email=email).first():
             return "User already exists."
 
         new_user = User(
             email=email,
-            password=generate_password_hash("default123"),  # Default password
+            password=generate_password_hash(password),
             role=role
         )
         db.session.add(new_user)
@@ -104,7 +102,6 @@ def manage_users():
 
     users = User.query.all()
     return render_template("admin_users.html", users=users)
-
 
 @admin.route("/admin/edit_user/<int:user_id>", methods=["GET", "POST"])
 @admin_required
@@ -123,7 +120,6 @@ def edit_user(user_id):
         return redirect(url_for("admin.manage_users"))
 
     return render_template("edit_user.html", user=user)
-
 
 @admin.route("/admin/delete_user/<int:user_id>")
 @admin_required
