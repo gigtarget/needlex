@@ -19,6 +19,22 @@
             box-shadow: 0 0 8px rgba(0,0,0,0.1);
         }
 
+        .top-nav {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+        .top-nav a {
+            color: purple;
+            font-weight: bold;
+            margin-left: 20px;
+            text-decoration: none;
+        }
+
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
+
         h2 {
             text-align: center;
             margin-bottom: 30px;
@@ -78,20 +94,16 @@
         .actions a.delete {
             color: red;
         }
-
-        .logout {
-            text-align: center;
-            margin-top: 30px;
-        }
-
-        .logout a {
-            color: purple;
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <div class="panel">
+        <!-- Top Navigation -->
+        <div class="top-nav">
+            <a href="{{ url_for('admin.manage_machines') }}">🏠 Home</a>
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+
         <h2>👤 Admin – User Management</h2>
 
         <form method="POST">
@@ -106,6 +118,11 @@
                     <option value="user">User</option>
                     <option value="admin">Admin</option>
                 </select>
+            </div>
+
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" required />
             </div>
 
             <button class="btn" type="submit">Add New User</button>
@@ -126,10 +143,6 @@
                     </div>
                 </div>
             {% endfor %}
-        </div>
-
-        <div class="logout">
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
         </div>
     </div>
 </body>
