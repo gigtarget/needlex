@@ -1,83 +1,68 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>User Dashboard – NeedleX</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f0f0f0;
-            padding: 30px;
-        }
+from flask import Blueprint, render_template, request, redirect, url_for
+from flask_login import login_required, current_user
+from app.models import db, Machine, NeedleChange
+from datetime import datetime
+import qrcode
+import os
 
-        .container {
-            max-width: 1000px;
-            margin: auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+main = Blueprint("main", __name__)
 
-        h2 {
-            text-align: center;
-            margin-bottom: 30px;
-        }
+@main.route("/")
+def home():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return redirect(url_for("auth.login"))
 
-        .machine-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
-        }
+@main.route("/dashboard")
+@login_required
+def dashboard():
+    if current_user.role == "admin":
+        return redirect(url_for("admin.admin_dashboard"))
+    else:
+        return redirect(url_for("main.user_dashboard"))
 
-        .machine-card {
-            width: 180px;
-            height: 120px;
-            background: #17a2b8;
-            color: white;
-            border-radius: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1rem;
-            font-weight: bold;
-            text-decoration: none;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
+@main.route("/user/dashboard")
+@login_required
+def user_dashboard():
+    if current_user.role != "user":
+        return redirect(url_for("main.dashboard"))
 
-        .machine-card:hover {
-            background-color: #138496;
-        }
+    machines = current_user.machines
+    return render_template("user_dashboard.html", machines=machines)
 
-        .logout {
-            text-align: center;
-            margin-top: 30px;
-        }
+@main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
+@login_required
+def head_view(machine_id, head_id):
+    if request.method == "POST":
+        needle_number = int(request.form["needle_number"])
+        needle_type = int(request.form["needle_type"])
 
-        .logout a {
-            color: #800080;
-            text-decoration: none;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-<div class="container">
-    <h2>👋 Welcome, {{ current_user.email }}</h2>
+        change = NeedleChange(
+            head_id=head_id,
+            needle_number=needle_number,
+            needle_type=needle_type,
+            timestamp=datetime.utcnow()
+        )
+        db.session.add(change)
+        db.session.commit()
 
-    <div class="machine-grid">
-        {% for machine in machines %}
-            <a href="{{ url_for('view_machine_heads', machine_id=machine.id) }}" class="machine-card">
-                🧵 {{ machine.name }}
-            </a>
-        {% endfor %}
-    </div>
+        return redirect(url_for("main.head_view", machine_id=machine_id, head_id=head_id))
 
-    <div class="logout">
-        <a href="{{ url_for('auth.logout') }}">Logout</a>
-    </div>
-</div>
-</body>
-</html>
+    logs = (
+        NeedleChange.query
+        .filter_by(head_id=head_id)
+        .order_by(NeedleChange.timestamp.desc())
+        .all()
+    )
+
+    last_change_dict = {}
+    for log in logs:
+        key = log.needle_number
+        if key not in last_change_dict:
+            last_change_dict[key] = log
+
+    return render_template("head_view.html",
+                           machine_id=machine_id,
+                           head_id=head_id,
+                           last_change_dict=last_change_dict,
+                           now=datetime.utcnow())
