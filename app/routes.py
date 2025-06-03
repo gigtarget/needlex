@@ -1,10 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required, current_user
-from app.models import db, NeedleChange
+from app.models import db, Machine, NeedleChange
 from datetime import datetime
 import qrcode
-import io
-import base64
 import os
 
 main = Blueprint("main", __name__)
@@ -12,50 +10,25 @@ main = Blueprint("main", __name__)
 @main.route("/")
 def home():
     if current_user.is_authenticated:
-        return redirect(url_for('main.dashboard'))
-    return redirect(url_for('auth.login'))
+        return redirect(url_for("main.dashboard"))
+    return redirect(url_for("auth.login"))
 
 @main.route("/dashboard")
 @login_required
 def dashboard():
     if current_user.role == "admin":
-        return redirect(url_for("admin.manage_machines"))
+        return redirect(url_for("admin.admin_dashboard"))
     else:
-        return redirect(url_for("main.user_home"))
+        return redirect(url_for("main.user_dashboard"))
 
-@main.route("/user/home")
+@main.route("/user/dashboard")
 @login_required
-def user_home():
+def user_dashboard():
     if current_user.role != "user":
         return redirect(url_for("main.dashboard"))
 
     machines = current_user.machines
-
-    if len(machines) != 1:
-        return "Multiple machine support coming soon."
-
-    machine = machines[0]
-
-    qr_folder = os.path.join("app", "static", "qr_codes")
-    os.makedirs(qr_folder, exist_ok=True)
-
-    qr_map = {}
-
-    for head in machine.heads:
-        qr_filename = f"qr_machine_{machine.id}_head_{head.id}.png"
-        qr_path = os.path.join(qr_folder, qr_filename)
-
-        if not os.path.exists(qr_path):
-            qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
-            qr = qrcode.QRCode(box_size=4, border=1)
-            qr.add_data(qr_url)
-            qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
-            img.save(qr_path)
-
-        qr_map[head.id] = qr_filename
-
-    return render_template("user_dashboard.html", machine=machine, qr_map=qr_map)
+    return render_template("user_dashboard.html", machines=machines)
 
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
