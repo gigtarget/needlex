@@ -30,6 +30,36 @@ def user_dashboard():
     machines = current_user.machines
     return render_template("user_dashboard.html", machines=machines)
 
+@main.route("/machine/<int:machine_id>")
+@login_required
+def view_machine_heads(machine_id):
+    machine = Machine.query.get_or_404(machine_id)
+
+    # Security check: users can only view their own machines
+    if current_user.role != "admin" and machine.owner_id != current_user.id:
+        return "Unauthorized"
+
+    qr_folder = os.path.join("app", "static", "qr_codes")
+    os.makedirs(qr_folder, exist_ok=True)
+
+    qr_map = {}
+
+    for head in machine.heads:
+        qr_filename = f"qr_machine_{machine.id}_head_{head.id}.png"
+        qr_path = os.path.join(qr_folder, qr_filename)
+
+        if not os.path.exists(qr_path):
+            qr_url = url_for('main.head_view', machine_id=machine.id, head_id=head.id, _external=True)
+            qr = qrcode.QRCode(box_size=4, border=1)
+            qr.add_data(qr_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            img.save(qr_path)
+
+        qr_map[head.id] = qr_filename
+
+    return render_template("machine_view.html", machine=machine, qr_map=qr_map)
+
 @main.route("/head/<int:machine_id>/<int:head_id>", methods=["GET", "POST"])
 @login_required
 def head_view(machine_id, head_id):
