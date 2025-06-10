@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin – NeedleX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f2f2f2;
+        }
+        nav {
+            background-color: #222;
+            padding: 10px 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        nav .left, nav .right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 6px 10px;
+            border-radius: 4px;
+        }
+        nav a:hover {
+            background-color: #444;
+        }
+        .container {
+            padding: 30px;
+            max-width: 1000px;
+            margin: auto;
+        }
+        ul.flashes {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 20px;
+            color: green;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="left">
+        <span>🧵 <strong>NeedleX Admin Panel</strong></span>
+    </div>
+
+    <div class="right">
+        {% if current_user.is_authenticated %}
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.manage_machines') }}">🛠️ Machines</a>
+                <a href="{{ url_for('admin.manage_users') }}">👤 Users</a>
+                <a href="{{ url_for('admin.manage_machines') }}">🏠 Home</a>
+            {% elif current_user.role == 'user' %}
+                <a href="{{ url_for('main.user_home') }}">🏠 Home</a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}">🚪 Logout</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+</body>
+</html>

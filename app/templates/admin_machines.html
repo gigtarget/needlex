@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Machine Panel – NeedleX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab-link {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            background: #eee;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            color: #000;
+        }
+
+        .tab-link.active {
+            background: #007bff;
+            color: white;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            padding: 12px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .machine-card {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 5px solid #007bff;
+            position: relative;
+        }
+
+        .actions {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+
+        .actions a {
+            margin-left: 10px;
+            text-decoration: none;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .actions a.delete {
+            color: red;
+        }
+
+        .logout {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .logout a {
+            color: #800080;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🛠️ Admin Machine Panel</h2>
+    <div class="welcome">
+        Welcome, {{ current_user.email }} (admin)
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="tabs">
+        <a href="{{ url_for('admin.manage_machines') }}" class="tab-link {% if request.path.endswith('/machines') %}active{% endif %}">Machines</a>
+        <a href="{{ url_for('admin.manage_users') }}" class="tab-link {% if request.path.endswith('/users') %}active{% endif %}">Users</a>
+    </div>
+
+    <!-- Add Machine Form -->
+    <form method="POST">
+        <label>Machine Name</label>
+        <input type="text" name="machine_name" placeholder="e.g. Tajima 1" required>
+
+        <label>Assign to user</label>
+        <select name="assigned_user" required>
+            <option value="{{ current_user.id }}">Myself ({{ current_user.email }})</option>
+            {% for user in users %}
+                <option value="{{ user.id }}">{{ user.email }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Number of Heads</label>
+        <input type="number" name="head_count" placeholder="e.g. 8" min="1" max="15" required>
+
+        <button type="submit" class="btn">Add Machine</button>
+    </form>
+
+    <!-- Machine List -->
+    <div class="machine-list">
+        <h3>📋 Machines</h3>
+        {% if machines %}
+            {% for machine in machines %}
+            <div class="machine-card">
+                <strong>{{ machine.name }}</strong><br>
+                Heads: {{ machine.heads|length }}<br>
+                Needle Changes: {{ needle_counts[machine.id] }}<br>
+                Assigned to: {{ machine.owner.email }}
+
+                <div class="actions">
+                    <a href="{{ url_for('admin.edit_machine', machine_id=machine.id) }}">✏️ Edit</a>
+                    <a class="delete" href="{{ url_for('admin.delete_machine', machine_id=machine.id) }}" onclick="return confirm('Are you sure you want to delete this machine?');">🗑️ Delete</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p>No machines added yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="logout">
+        <a href="{{ url_for('auth.logout') }}">Logout</a>
+    </div>
+</div>
+
+</body>
+</html>
