@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard – NeedleX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .machine-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .machine-card {
+            width: 180px;
+            height: 120px;
+            background: #007bff;
+            color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .machine-card:hover {
+            background-color: #0056b3;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .actions a {
+            padding: 14px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .actions a.users {
+            background: #6f42c1;
+        }
+
+        .actions a:hover {
+            opacity: 0.9;
+        }
+
+        .logout {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .logout a {
+            color: #800080;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>👋 Welcome, {{ current_user.email }}</h2>
+
+        <!-- Machine Grid -->
+        <div class="machine-grid">
+            {% for machine in machines %}
+                <a href="{{ url_for('admin.edit_machine', machine_id=machine.id) }}" class="machine-card">
+                    🏭 {{ machine.name }}
+                </a>
+            {% endfor %}
+            <a href="{{ url_for('admin.manage_machines') }}" class="machine-card" style="background:#17a2b8;">
+                ➕ Add Machine
+            </a>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <a href="{{ url_for('admin.manage_machines') }}">🛠 Manage Machines</a>
+            <a href="{{ url_for('admin.manage_users') }}" class="users">👤 Manage Users</a>
+        </div>
+
+        <div class="logout">
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </div>
+    </div>
+</body>
+</html>
