@@ -1,0 +1,28 @@
+<!-- app/templates/edit_machine.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Machine</title>
+</head>
+<body>
+    <h1>Edit Machine: {{ machine.name }}</h1>
+
+    <form method="POST" action="">
+        <label for="name">Machine Name:</label>
+        <input type="text" name="name" id="name" value="{{ machine.name }}">
+
+        <label for="user">Assigned User:</label>
+        <select name="user_id" id="user">
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if user.id == machine.user_id %}selected{% endif %}>
+                    {{ user.email }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <a href="/admin/machines">Back to Machines</a>
+</body>
+</html>
